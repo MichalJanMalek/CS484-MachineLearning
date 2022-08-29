@@ -12,3 +12,4 @@ df = ns.read_csv('NormalSample.csv')
 
 print(df.to_string()) 
 
+print (df.describe)
