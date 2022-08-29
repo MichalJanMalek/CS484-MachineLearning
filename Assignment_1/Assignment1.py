@@ -6,10 +6,14 @@ Created on Mon Aug 29 15:59:16 2022
 @author: michalmalek
 """
 
-import pandas as ns
 
-df = ns.read_csv('NormalSample.csv')
+import pandas
+
+
+df = pandas.read_csv('NormalSample.csv')
+Xline = df['x']
 
 print(df.to_string()) 
 
-print (df.describe)
+print (Xline.describe())
+
