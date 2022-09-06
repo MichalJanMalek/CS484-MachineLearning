@@ -8,8 +8,14 @@ Created on Mon Aug 29 15:59:16 2022
 
 
 import matplotlib.pyplot as plt
-import numpy
+import numpy 
+from numpy import linalg as LA
+import scipy
+from scipy import linalg as LA2
 import pandas
+import sklearn
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn import metrics
 
 #Question 1-----------------------------------------
 ######################
@@ -18,7 +24,7 @@ df = pandas.read_csv('NormalSample.csv')
 X = df['x']
 
 #print(df.to_string()) 
-
+"""
 print (X.describe())
 
 ######################
@@ -79,32 +85,150 @@ for d in deltaList:
 
 result = pandas.DataFrame(result, columns = {0:'Delta', 1:'C(Delta)', 2:'Low Y', 3:'Middle Y', 4:'High Y', 5:'N Bin'})
 
-fig1, ax1 = plt.subplots()
-ax1.set_title('Box Plot')
-ax1.boxplot(X, labels = ['Y'])
-ax1.grid(linestyle = '--', linewidth = 1)
+# Draw a better labeled histogram with specified bin boundaries (bin width = 10)
+plt.hist(x, bins = [212.5,213.5,214.5,215.5,216.5,217.5,218.5], align='mid’)
+
+# Specify title, labels
+plt.title('My Weights in Past Ten Days')
+plt.xlabel('Weight (lbs)')
+plt.ylabel('Number of Days’)
+
+# Specify y-axis tick values
+plt.yticks(range(4))
+
+# Show grid line on y-axis
+plt.grid(axis = 'y’)
+
+# Show the histogram
 plt.show()
+
+
+######################
+##Part 4
+
 
 
 #Question 2-----------------------------------------
 
+    #split up dataset into two groups
 dataSet0 = df[df['group']==0]
-print (dataSet0.describe().loc[['min', '25%', '50%', '75%', 'max']])
-
-
 dataSet1 = df[df['group']==1]
-print (dataSet1.describe().loc[['min', '25%', '50%', '75%', 'max']])
+
+    #format for 5-number summary
+set0 = dataSet0.describe().loc[['min', '25%', '50%', '75%', 'max']]['x']
+set1 = dataSet1.describe().loc[['min', '25%', '50%', '75%', 'max']]['x']
+
+    #get IQR and whiskers for set 0
+q1s0 = dataSet0.describe().loc['25%'].tolist()[1]
+q3s0 = dataSet0.describe().loc['75%'].tolist()[1]
+iqr0 = (q3s0 - q1s0)
+lower0 = q1s0 - 1.5*iqr0
+upper0 = q3s0 + 1.5*iqr0
+
+    #get IQR and whiskers for set 1
+q1s1 = dataSet1.describe().loc['25%'].tolist()[1]
+q3s1 = dataSet1.describe().loc['75%'].tolist()[1]
+iqr1 = (q3s1 - q1s1)
+lower1 = q1s1 - 1.5*iqr1
+upper1 = q3s1 + 1.5*iqr1
+
+    #print 5-number sum out + whisker
+print ('')
+print (set0)
+print ("\nLower Whisker = ",lower0,"\nUpper Whisker = ",upper0)
+print ('')
+print (set1)
+print ("\nLower Whisker = ",lower1,"\nUpper Whisker = ",upper1)
+
+######################
+##Part 2
+
+fig1, ax1 = plt.subplots()
+ax1.set_title('Overall Box Plot')
+ax1.boxplot([X, dataSet0['x'], dataSet1['x']], labels = ['Overall', 'Group 0', 'Group 1'])
+ax1.grid(linestyle = '--', linewidth = 1)
+plt.show()
+
+#find outliers by finding all that are lower than Q1 nd greater than Q3
+
 
 #Question 3-----------------------------------------
+######################
+##Part 1
 
 q3 = pandas.read_csv('Fraud.csv')
 
 #print(q3.to_string()) 
 
-fraudCases = "{:.4f}".format(((((q3['FRAUD'] == 1).sum())/5960)*100), 4) + "%"
+fraudCases = ("{:.4f}".format(((((q3['FRAUD'] == 1).sum())/5960)*100), 4) + "%")
 
              
-print("\n" + fraudCases + '\n')
+print("\nPercent of Frauduelent Cases : " + fraudCases + '\n')
+
+######################
+##Part 2
+
+x = q3.copy().drop(columns=['CASE_ID', 'FRAUD']).to_numpy()
+    #code provided by professor
+#
+xtx = numpy.matmul(x.transpose(), x)
+print("t(x) * x = \n", xtx)
+
+    # Eigenvalue decomposition
+evals, evecs = LA.eigh(xtx)
+print("Eigenvalues of x = \n", evals)
+print("Eigenvectors of x = \n",evecs)
+
+    # Want eigenvalues greater than one
+evals_1 = evals[evals > 1.0]
+evecs_1 = evecs[:,evals > 1.0]
+
+    # Here is the transformation matrix
+dvals = 1.0 / numpy.sqrt(evals_1)
+transf = numpy.matmul(evecs_1, numpy.diagflat(dvals))
+print("Transformation Matrix = \n", transf)
+
+    # Here is the transformed X
+transf_x = numpy.matmul(x, transf)
+print("The Transformed x = \n", transf_x)
+
+    # Check columns of transformed X
+xtx = numpy.matmul(transf_x.transpose(), transf_x)
+print("Expect an Identity Matrix = \n", xtx)
+
+######################
+##Part 3
+y = q3['FRAUD']
+target_class = list(y.unique())
+k=5
+
+neigh = KNeighborsClassifier(n_neighbors = k, metric = 'euclidean')
+nbrs = neigh.fit(transf_x, y)
+class_prob = nbrs.predict_proba(transf_x)
+
+nbrs_list = numpy.argmax(class_prob, axis = 1)
+predicted_class = [target_class[k] for k in nbrs_list]
+rate_miss_class = numpy.mean(numpy.where(predicted_class == y, 0, 1))
+
+miss = ("{:.4f}".format((rate_miss_class*100), 4) + "%")
+print(miss)
+
+nbrs = ("{:.4f}".format((nbrs.score(transf_x, y)*100), 4) + "%")
+print(nbrs)
+######################
+##Part 4
+
+print(q3.median())
+median = [[16300, 8, 0, 178, 1 ,2]]
+
+med_transf = numpy.matmul(median, transf)
+
+neighborsfive = neigh.kneighbors(med_transf, return_distance=False)
+print(neighborsfive)
+
+print (q3.iloc[neighborsfive[0]])
+
+"""
 
 #Question 4-----------------------------------------
 ######################
@@ -127,12 +251,33 @@ plt.show()
 s1 = pandas.Series(q4['Airport 2'].values)
 s2 = pandas.Series(q4['Airport 3'].values)
 combined = pandas.concat([s1, s2])
-freq = combined.replace({''}, numpy.nan).value_counts()
+freq = combined.replace({''}, '___').value_counts()
 
-print (freq)
+#print (freq)
 
 #######################
 ##Part 3
 
+ap = freq.index
+count = []
+for i in q4.drop(columns=['Flight', 'Carrier 1', 'Carrier 2', 'Airport 1', 'Airport 4']).iterrows():
+    inrow = []
+    for j in ap:
+        inrow.append(list(i[1]).count(j))
+    count.append(inrow)
+    
+print(count)
+
+newFly = ['LAX', '___']
+newRow = []
+for i in ap:
+    newRow.append((newFly).count(i))
+
+cosList = []
+for i in range(13):
+    cosList.append(scipy.spatial.distance.cosine(newRow, count[i]))
+
+print(cosList)
+#q4['count'] = graphlab.text_analytics.count_words(q4['Airport 2'])
 #scipy.spatial.distance.cosine(row,word_count_list[i])
 
