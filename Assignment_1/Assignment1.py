@@ -11,19 +11,23 @@ import matplotlib.pyplot as plt
 import numpy
 import pandas
 
-##Part 1a
+#Question 1-----------------------------------------
+######################
+##Part 1
 df = pandas.read_csv('NormalSample.csv')
 X = df['x']
 
-print(df.to_string()) 
+#print(df.to_string()) 
 
 print (X.describe())
 
-##Part 1b
+######################
+##Part 2
 
-print(2*(324-304) * 1000 ** (-1/3))
+print ("\n" + "Bin Width : "+"%.1f" % round((2*(324-304) * 1000 ** (-1/3)), 1)+ '\n')
 
-##Part 1c
+######################
+##Part 3
 
 plt.hist(X)
 plt.show()
@@ -80,3 +84,55 @@ ax1.set_title('Box Plot')
 ax1.boxplot(X, labels = ['Y'])
 ax1.grid(linestyle = '--', linewidth = 1)
 plt.show()
+
+
+#Question 2-----------------------------------------
+
+dataSet0 = df[df['group']==0]
+print (dataSet0.describe().loc[['min', '25%', '50%', '75%', 'max']])
+
+
+dataSet1 = df[df['group']==1]
+print (dataSet1.describe().loc[['min', '25%', '50%', '75%', 'max']])
+
+#Question 3-----------------------------------------
+
+q3 = pandas.read_csv('Fraud.csv')
+
+#print(q3.to_string()) 
+
+fraudCases = "{:.4f}".format(((((q3['FRAUD'] == 1).sum())/5960)*100), 4) + "%"
+
+             
+print("\n" + fraudCases + '\n')
+
+#Question 4-----------------------------------------
+######################
+##Part 1
+q4 = pandas.read_csv('flights.csv').fillna('')
+print(q4.to_string()) 
+
+Xax = q4['Airport 2']
+Yax = q4['Airport 3']
+
+plt.scatter(Xax, Yax)
+plt.ylabel('Airport 3')
+plt.xlabel('Airport 2')
+
+plt.show()
+
+#######################
+##Part 2
+
+s1 = pandas.Series(q4['Airport 2'].values)
+s2 = pandas.Series(q4['Airport 3'].values)
+combined = pandas.concat([s1, s2])
+freq = combined.replace({''}, numpy.nan).value_counts()
+
+print (freq)
+
+#######################
+##Part 3
+
+#scipy.spatial.distance.cosine(row,word_count_list[i])
+
