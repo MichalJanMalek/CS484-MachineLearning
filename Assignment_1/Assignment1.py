@@ -24,7 +24,7 @@ df = pandas.read_csv('NormalSample.csv')
 X = df['x']
 
 #print(df.to_string()) 
-"""
+
 print (X.describe())
 
 ######################
@@ -85,34 +85,52 @@ for d in deltaList:
 
 result = pandas.DataFrame(result, columns = {0:'Delta', 1:'C(Delta)', 2:'Low Y', 3:'Middle Y', 4:'High Y', 5:'N Bin'})
 
-# Draw a better labeled histogram with specified bin boundaries (bin width = 10)
-plt.hist(x, bins = [212.5,213.5,214.5,215.5,216.5,217.5,218.5], align='mid’)
-
-# Specify title, labels
-plt.title('My Weights in Past Ten Days')
-plt.xlabel('Weight (lbs)')
-plt.ylabel('Number of Days’)
-
-# Specify y-axis tick values
-plt.yticks(range(4))
-
-# Show grid line on y-axis
-plt.grid(axis = 'y’)
-
-# Show the histogram
-plt.show()
-
-
 ######################
 ##Part 4
+d=10
 
+nBin, middleX, lowX, CDelta = calcCD(X,d)
+highX = lowX + nBin * d
+result.append([d, CDelta, lowX, middleX, highX, nBin])
 
+binMid = lowX + 0.5 * d + numpy.arange(nBin) * d
+plot = plt.hist(X, bins = binMid, align='mid')
+plt.title('Delta = ' + str(d))
+plt.ylabel('Number of Observations')
+plt.grid(axis = 'y')
+plt.show()
+
+mid = plot[1]
+print(mid)
+newArray = []
+for i in mid:
+    newArray.append(i+5)
+    
+print (newArray)    
+
+d = plot[0]
+newerArray = []
+for i in d:
+    newerArray.append(i/(10000))
+
+newerArray.append(0)
+
+plt.bar(x=newArray, height=newerArray, width=5)    
+plt.title('Estimated Density Function')
+plt.ylabel('p(m)')
+plt.grid(axis='y')
+plt.show()
+    
 
 #Question 2-----------------------------------------
+######################
+##Part 1
 
     #split up dataset into two groups
 dataSet0 = df[df['group']==0]
 dataSet1 = df[df['group']==1]
+
+print(dataSet0)
 
     #format for 5-number summary
 set0 = dataSet0.describe().loc[['min', '25%', '50%', '75%', 'max']]['x']
@@ -151,6 +169,40 @@ plt.show()
 
 #find outliers by finding all that are lower than Q1 nd greater than Q3
 
+set1 = dataSet1.describe().loc[['min', '25%', '50%', '75%', 'max']]['x']
+
+    #get IQR and whiskers for set 0
+q1A = X.describe().loc['25%'].tolist()
+
+q3A = X.describe().loc['75%'].tolist()
+iqA = (q3A - q1A)
+print (iqA)
+lowerAll = q1A - 1.5*iqA
+print (lowerAll)
+upperAll = q3A + 1.5*iqA
+print (upperAll)
+
+allOut = []
+g1Out = []
+g2Out = []
+
+for i in X:
+    if i < lowerAll or i > upperAll:
+        allOut.append(i)
+
+for j in dataSet0['x']:
+    if j < lower0 or j > upper0:
+        g1Out.append(j)
+    
+for k in dataSet1['x']:
+    if k < lower1 or k > upper1:
+        g2Out.append(k)
+    
+print ('Outlier for Both : ' + str(allOut))
+print ('Outlier for Group 0 : ' + str(g1Out))
+print ('Outlier for Group 1 : ' + str(g2Out))     
+       
+       
 
 #Question 3-----------------------------------------
 ######################
@@ -228,7 +280,7 @@ print(neighborsfive)
 
 print (q3.iloc[neighborsfive[0]])
 
-"""
+
 
 #Question 4-----------------------------------------
 ######################
@@ -278,6 +330,3 @@ for i in range(13):
     cosList.append(scipy.spatial.distance.cosine(newRow, count[i]))
 
 print(cosList)
-#q4['count'] = graphlab.text_analytics.count_words(q4['Airport 2'])
-#scipy.spatial.distance.cosine(row,word_count_list[i])
-
