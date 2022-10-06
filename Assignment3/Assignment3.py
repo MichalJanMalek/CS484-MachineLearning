@@ -21,13 +21,15 @@ claim = pandas.read_csv('claim_history.csv')
 
 find = claim[["CAR_TYPE","OCCUPATION","EDUCATION"]]
 
-find_train, find_test, labels_train, labels_test = train_test_split(find,claim["CAR_USE"],test_size = 0.3, random_state=27513,stratify = claim["CAR_USE"])
+count=0
+for i in claim["CAR_USE"]:
+    if i == "Commercial":
+        count+=1
+prob_com = count/len(claim["CAR_USE"])
 
-cross_Table_Train = pandas.crosstab(labels_train,columns =  ["Count"],margins=True,dropna=True)
-cross_Table_Train["Proportions"] = (cross_Table_Train["Count"]/len(labels_train))*100
+prob_pri = (len(claim["CAR_USE"])-count)/len(claim["CAR_USE"])
 
-cross_Table_Test = pandas.crosstab(labels_test ,columns =  ["Count"],margins=True,dropna=True)
-cross_Table_Test["Proportions"] = (cross_Table_Train["Count"]/len(labels_test))*100
+entropy = -((prob_com * numpy.log2(prob_com) + prob_pri * numpy.log2(prob_pri)))
 
 #Question 2-----------------------------------------
 ######################
