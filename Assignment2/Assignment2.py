@@ -145,8 +145,8 @@ plt.clf()
 plt.plot(lis, Elbow)
 plt.scatter(lis, Elbow)
 plt.title('Elbow Value of "TwoFeatures.csv"')
-plt.xlabel("Elbow Value")
-plt.ylabel("Cluster Number")
+plt.xlabel("Cluster Number")
+plt.ylabel("Elbow Value")
 plt.show()
 
 # d ---------------------

@@ -160,7 +160,7 @@ print ("\nLower Whisker = ",lower1,"\nUpper Whisker = ",upper1)
 
 ######################
 ##Part 2
-
+"""  
 fig1, ax1 = plt.subplots()
 ax1.set_title('Overall Box Plot')
 ax1.boxplot([X, dataSet0['x'], dataSet1['x']], labels = ['Overall', 'Group 0', 'Group 1'])
@@ -202,7 +202,7 @@ print ('Outlier for Both : ' + str(allOut))
 print ('Outlier for Group 0 : ' + str(g1Out))
 print ('Outlier for Group 1 : ' + str(g2Out))     
        
-       
+ 
 
 #Question 3-----------------------------------------
 ######################
@@ -330,3 +330,4 @@ for i in range(13):
     cosList.append(scipy.spatial.distance.cosine(newRow, count[i]))
 
 print(cosList)
+"""
